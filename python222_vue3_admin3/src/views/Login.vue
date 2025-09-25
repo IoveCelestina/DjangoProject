@@ -2,7 +2,7 @@
   <div class="login">
 
     <el-form ref="loginRef" :model="loginForm" :rules="loginRules" class="login-form">
-      <h3 class="title">python222 Django后台管理系统</h3>
+      <h3 class="title">ZSTU ACM</h3>
 
       <el-form-item prop="username">
 
