@@ -93,7 +93,7 @@
             Cookies.remove("password");
             Cookies.remove("rememberMe");
           }
-          router.replace("/")
+          //router.replace("/")
         }else{
           ElMessage.error(data.info)
         }
