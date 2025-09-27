@@ -7,7 +7,7 @@
       router
       :default-active="'/index'"
   >
-    <el-menu-item index="/index">
+    <el-menu-item index="/index" @click="openTab({name:'首页',path:'/index'})">
       <el-icon>
         <home-filled/>
       </el-icon>
@@ -21,7 +21,7 @@
         </el-icon>
         <span>{{menu.name}}</span>
       </template>
-      <el-menu-item :index="item.path" v-for="item in menu.children">
+      <el-menu-item :index="item.path" v-for="item in menu.children" @click="openTab(item)">
         <el-icon>
           <svg-icon :icon="item.icon"/>
         </el-icon>
@@ -34,11 +34,17 @@
 </template>
 
 <script setup>
+import store from '@/store'
 import {
   HomeFilled
 } from '@element-plus/icons-vue'
 
+
 const menuList=JSON.parse(sessionStorage.getItem("menuList"))
+
+const openTab=(item)=>{
+  store.commit('ADD_TABS',item)
+}
 </script>
 
 <style lang="scss" scoped>

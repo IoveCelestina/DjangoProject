@@ -2,7 +2,7 @@
   <div class="login">
 
     <el-form ref="loginRef" :model="loginForm" :rules="loginRules" class="login-form">
-      <h3 class="title">python222 Django后台管理系统</h3>
+      <h3 class="title">ZSTU_ACM</h3>
 
       <el-form-item prop="username">
 
@@ -45,7 +45,7 @@
     </el-form>
     <!--  底部  -->
     <div class="el-login-footer">
-      <span>Copyright © 2013-2025 <a href="http://www.python222.com" target="_blank">python222.com</a> 版权所有.</span>
+      <span>Copyright © 2013-2025 <a href="https://zstuacm.cn" target="_blank">ZSTU_ACM集训队吧 </a> 版权所有.</span>
     </div>
   </div>
 </template>
