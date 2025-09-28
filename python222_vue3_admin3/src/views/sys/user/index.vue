@@ -75,6 +75,9 @@
 		/>
 		<Dialog v-model="dialogVisible" :dialogVisible="dialogVisible" :id="id" :dialogTitle="dialogTitle"
 				@initUserList="initUserList"></Dialog>
+		<RoleDialog v-model="roleDialogVisible" :sysRoleList="sysRoleList"
+					:roleDialogVisible="roleDialogVisible" :id="id"
+					@initUserList="initUserList"></RoleDialog>
 	</div>
 </template>
 
@@ -84,6 +87,8 @@ import {Search, Delete, DocumentAdd, Edit, Tools, RefreshRight} from '@element-p
 import {ref} from "vue";
 import Dialog from './components/dialog'
 import {ElMessage} from 'element-plus'
+import RoleDialog from './components/roleDialog'
+
 const tableData=ref([])
 const total=ref(0)
 const queryForm=ref({
@@ -91,7 +96,15 @@ const queryForm=ref({
 	pageNum:1,
 	pageSize:10
 })
-
+const sysRoleList = ref([])
+const roleDialogVisible = ref(false)
+const handleRoleDialogValue = (userId, roleList) => {
+	console.log("roleList：", roleList)
+	console.log("id:", id)
+	id.value = userId;
+	sysRoleList.value = roleList;
+	roleDialogVisible.value = true
+}
 const delBtnStatus = ref(true)
 const multipleSelection = ref([])
 const handleSelectionChange = (selection) => {

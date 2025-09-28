@@ -1,7 +1,7 @@
 from django.urls import path
 
 from user.views import TestView, JwtTestView, LoginView, SaveView, PwdView, ImageView, AvatarView, SearchView, \
-    ActionView, CheckView, PasswordView, StatusView
+    ActionView, CheckView, PasswordView, StatusView, GrantRole
 
 urlpatterns = [
     path('login', LoginView.as_view(), name='login'),  # 登录
@@ -16,4 +16,5 @@ urlpatterns = [
     path('check', CheckView.as_view(), name='check'),  # 用户名查重
     path('resetPassword', PasswordView.as_view(), name='resetPassword'),  # 重置密码
     path('status', StatusView.as_view(), name='status'),  # 状态修改
+    path('grantRole', GrantRole.as_view(), name='grant'),  # 角色授权
 ]

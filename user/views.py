@@ -252,3 +252,17 @@ class StatusView(View):
             user_object.status = status
             user_object.save()
             return JsonResponse({'code': 200})
+
+
+# 用户角色授权
+class GrantRole(View):
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        user_id = data['id']
+        roleIdList = data['roleIds']
+        print(user_id, roleIdList)
+        SysUserRole.objects.filter(user_id=user_id).delete()  # 删除用户角色关联表中的指定用户数据
+        for roleId in roleIdList:
+            userRole = SysUserRole(user_id=user_id, role_id=roleId)
+            userRole.save()
+        return JsonResponse({'code': 200})
