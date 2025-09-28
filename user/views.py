@@ -231,3 +231,24 @@ class SearchView(View):
             user['roleList']=roleListDict
         total = SysUser.objects.count()
         return JsonResponse({'code': 200, 'userList': users, 'total': total})
+
+
+# 重置密码
+class PasswordView(View):
+    def get(self, request):
+        id = request.GET.get("id")
+        user_object = SysUser.objects.get(id=id)
+        user_object.password = "123456"
+        user_object.update_time = datetime.now().date()
+        user_object.save()
+        return JsonResponse({'code': 200})
+# 用户状态修改
+class StatusView(View):
+        def post(self, request):
+            data = json.loads(request.body.decode("utf-8"))
+            id = data['id']
+            status = data['status']
+            user_object = SysUser.objects.get(id=id)
+            user_object.status = status
+            user_object.save()
+            return JsonResponse({'code': 200})
