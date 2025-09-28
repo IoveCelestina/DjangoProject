@@ -1,6 +1,6 @@
 from django.urls import path
 
-from user.views import TestView, JwtTestView, LoginView, SaveView, PwdView
+from user.views import TestView, JwtTestView, LoginView, SaveView, PwdView, ImageView, AvatarView
 
 urlpatterns = [
     path('login', LoginView.as_view(), name='login'),  # 登录
@@ -8,4 +8,7 @@ urlpatterns = [
     path('test', TestView.as_view(), name='test'),  # 测试
     path('jwt_test', JwtTestView.as_view(), name='jwt_test'),  # jwt测试
     path('updateUserPwd', PwdView.as_view(), name='updateUserPwd'),  # 修改密码
+    path('uploadImage', ImageView.as_view(), name='uploadImage'),  # 头像上传
+    path('updateAvatar', AvatarView.as_view(), name='updateAvatar'),  # 更新头像
+
 ]

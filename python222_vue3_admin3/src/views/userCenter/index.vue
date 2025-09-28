@@ -10,8 +10,9 @@
 					</template>
 					<div>
 						<div class="text-center">
-							<avatar/>
+							<avatar :user="currentUser"/> <!--需要接受数据就需要加user="...-->
 						</div>
+
 						<ul class="list-group list-group-striped">
 							<li class="list-group-item">
 								<svg-icon icon="user"/>&nbsp;&nbsp;用户名称

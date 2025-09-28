@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.views import View
 from rest_framework_jwt.settings import api_settings
 
+from DjangoProject import settings
 from menu.models import SysMenu, SysMenuSerializer
 from role.models import SysRole
 from user.models import SysUser, SysUserSerializer
@@ -133,3 +134,32 @@ class PwdView(View): #不安全，之后需要在前端进行加密
             return JsonResponse({'code': 200})
         else:
             return JsonResponse({'code': 500, 'errorInfo': '原密码错误！'})
+
+
+class ImageView(View):
+    def post(self, request):
+        file = request.FILES.get('avatar')
+        print("file:", file)
+        if file:
+            file_name = file.name
+            suffixName = file_name[file_name.rfind("."):]
+            new_file_name = datetime.now().strftime('%Y%m%d%H%M%S') + suffixName
+            file_path = str(settings.MEDIA_ROOT) + "\\userAvatar\\" + new_file_name
+            print("file_path:", file_path)
+            try:
+                with open(file_path, 'wb') as f:
+                    for chunk in file.chunks():
+                        f.write(chunk)
+                return JsonResponse({'code': 200, 'title': new_file_name})
+            except:
+                return JsonResponse({'code': 500, 'errorInfo': '上传头像失败'})
+
+class AvatarView(View):
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data['id']
+        avatar = data['avatar']
+        obj_user = SysUser.objects.get(id=id)
+        obj_user.avatar = avatar
+        obj_user.save()
+        return JsonResponse({'code': 200})
