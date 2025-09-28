@@ -170,10 +170,23 @@ class SearchView(View):
         data = json.loads(request.body.decode("utf-8"))
         pageNum = data['pageNum']  # 当前页
         pageSize = data['pageSize']  # 每页大小
+        query = data['query'] #查询参数
         print(pageNum, pageSize)
-        userListPage = Paginator(SysUser.objects.all(), pageSize).page(pageNum)
+        userListPage = Paginator(SysUser.objects.filter(username__icontains=query), pageSize).page(pageNum)
         print(userListPage)
         obj_users = userListPage.object_list.values()  # 转成字典
         users = list(obj_users)  # 把外层的容器转为List
+        for user in users:
+            userId = user['id']
+            roleList=SysRole.objects.raw(
+                "select id,name from sys_role where id in (select role_id from sys_user_role where user_id="+str(userId)+")"
+            )
+            roleListDict=[]
+            for role in roleList:
+                roleDict={}
+                roleDict['id'] = role.id
+                roleDict['name']=role.name
+                roleListDict.append(roleDict)
+            user['roleList']=roleListDict
         total = SysUser.objects.count()
         return JsonResponse({'code': 200, 'userList': users, 'total': total})
