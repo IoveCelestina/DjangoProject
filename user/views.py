@@ -1,3 +1,6 @@
+import json
+from datetime import datetime
+
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
@@ -99,3 +102,34 @@ class JwtTestView(View):
         # 将属性值编码成jwt格式的字符串
         token = jwt_encode_handler(payload)
         return JsonResponse({'code': 200, 'token': token})
+
+class SaveView(View):
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        print(data)
+        if data['id'] == -1:  # 添加
+            pass
+        else:  # 修改
+            obj_sysUser = SysUser(id=data['id'], username=data['username'], password=data['password'],
+                                  avatar=data['avatar'], email=data['email'], phonenumber=data['phonenumber'],
+                                  login_date=data['login_date'], status=data['status'], create_time=data['create_time'],
+                                  update_time=data['update_time'], remark=data['remark'])
+            obj_sysUser.update_time = datetime.now().date()
+            obj_sysUser.save()
+        return JsonResponse({'code': 200})
+
+
+class PwdView(View): #不安全，之后需要在前端进行加密
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data['id']
+        oldPassword = data['oldPassword']
+        newPassword = data['newPassword']
+        obj_user = SysUser.objects.get(id=id)
+        if obj_user.password == oldPassword:
+            obj_user.password = newPassword
+            obj_user.update_time = datetime.now().date()
+            obj_user.save()
+            return JsonResponse({'code': 200})
+        else:
+            return JsonResponse({'code': 500, 'errorInfo': '原密码错误！'})
