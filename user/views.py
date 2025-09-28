@@ -40,7 +40,11 @@ class LoginView(View):
             roleList = SysRole.objects.raw(
                 "SELECT id ,NAME FROM sys_role WHERE id IN (SELECT role_id FROM sys_user_role WHERE user_id=" + str(
                     user.id) + ")")
-            print(roleList)
+            print(roleList)   #角色集合
+
+            #获取当前用户拥有的角色
+            roles=",".join([role.name for role in roleList])
+
             menuSet:set[SysMenu] = set()
             for row in roleList:
                 print(row.id,row.name)
@@ -63,7 +67,7 @@ class LoginView(View):
         except Exception as e:
             print(e)
             return JsonResponse({'code': 500, 'info': '用户名或者密码错误！'})
-        return JsonResponse({'code': 200, 'token': token, 'user': SysUserSerializer(user).data, 'info': '登录成功',
+        return JsonResponse({'code': 200, 'token': token, 'user': SysUserSerializer(user).data, 'info': '登录成功','roles':roles,
                              'menuList':serializerMenuList})
 
 

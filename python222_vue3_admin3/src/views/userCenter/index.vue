@@ -10,7 +10,7 @@
 					</template>
 					<div>
 						<div class="text-center">
-							修改头像
+							<avatar/>
 						</div>
 						<ul class="list-group list-group-striped">
 							<li class="list-group-item">
@@ -27,7 +27,7 @@
 							</li>
 							<li class="list-group-item">
 								<svg-icon icon="peoples"/>&nbsp;&nbsp;所属角色
-								<div class="pull-right"></div>
+								<div class="pull-right">{{currentUser.roles}}</div>
 							</li>
 							<li class="list-group-item">
 								<svg-icon icon="date"/>&nbsp;&nbsp;创建日期
@@ -46,10 +46,10 @@
 					</template>
 					<el-tabs v-model="activeTab">
 						<el-tab-pane label="基本资料" name="userinfo">
-							基本资料
+							<userInfo/>
 						</el-tab-pane>
 						<el-tab-pane label="修改密码" name="resetPwd">
-							修改密码
+							<resetPwd/>
 						</el-tab-pane>
 					</el-tabs>
 				</el-card>
@@ -59,6 +59,10 @@
 </template>
 <script setup>
 import {ref} from 'vue'
+import avatar from './components/avatar.vue'
+import resetRwd from './components/resetPwd.vue'
+import userInfo from './components/userInfo.vue'
+import ResetPwd from "@/views/userCenter/components/resetPwd.vue";
 const currentUser = JSON.parse(sessionStorage.getItem("currentUser"))
 const activeTab = ref("userinfo");
 </script>
