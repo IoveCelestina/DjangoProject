@@ -106,11 +106,19 @@ class JwtTestView(View):
         return JsonResponse({'code': 200, 'token': token})
 
 class SaveView(View):
+
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
         print(data)
         if data['id'] == -1:  # 添加
-            pass
+            obj_sysUser = SysUser(username=data['username'], password=data['password'],
+                                  email=data['email'], phonenumber=data['phonenumber'],
+                                  status=data['status'],
+                                  remark=data['remark'])
+            obj_sysUser.create_time = datetime.now().date()
+            obj_sysUser.avatar = 'default.jpg'
+            obj_sysUser.password = "123456"
+            obj_sysUser.save()
         else:  # 修改
             obj_sysUser = SysUser(id=data['id'], username=data['username'], password=data['password'],
                                   avatar=data['avatar'], email=data['email'], phonenumber=data['phonenumber'],
@@ -120,6 +128,28 @@ class SaveView(View):
             obj_sysUser.save()
         return JsonResponse({'code': 200})
 
+class ActionView(View):
+
+    def get(self, request):
+        """
+        根据id获取用户信息
+        :param request:
+        :return:
+        """
+        id = request.GET.get("id")
+        user_object = SysUser.objects.get(id=id)
+        return JsonResponse({'code': 200, 'user': SysUserSerializer(user_object).data})
+
+class CheckView(View):
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        username = data['username']
+        print("username=", username)
+        if SysUser.objects.filter(username=username).exists():
+            return JsonResponse({'code': 500})
+        else:
+            return JsonResponse({'code': 200})
 
 class PwdView(View): #不安全，之后需要在前端进行加密
     def post(self, request):
