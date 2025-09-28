@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 
+from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
@@ -163,3 +164,16 @@ class AvatarView(View):
         obj_user.avatar = avatar
         obj_user.save()
         return JsonResponse({'code': 200})
+
+class SearchView(View):
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        pageNum = data['pageNum']  # 当前页
+        pageSize = data['pageSize']  # 每页大小
+        print(pageNum, pageSize)
+        userListPage = Paginator(SysUser.objects.all(), pageSize).page(pageNum)
+        print(userListPage)
+        obj_users = userListPage.object_list.values()  # 转成字典
+        users = list(obj_users)  # 把外层的容器转为List
+        total = SysUser.objects.count()
+        return JsonResponse({'code': 200, 'userList': users, 'total': total})
