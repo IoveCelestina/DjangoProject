@@ -9,7 +9,7 @@ from rest_framework_jwt.settings import api_settings
 
 from DjangoProject import settings
 from menu.models import SysMenu, SysMenuSerializer
-from role.models import SysRole
+from role.models import SysRole, SysUserRole
 from user.models import SysUser, SysUserSerializer
 
 
@@ -139,6 +139,17 @@ class ActionView(View):
         id = request.GET.get("id")
         user_object = SysUser.objects.get(id=id)
         return JsonResponse({'code': 200, 'user': SysUserSerializer(user_object).data})
+
+    def delete(self, request):
+        """
+       删除操作
+       :param request:
+        :return:
+        """
+        idList = json.loads(request.body.decode("utf-8"))
+        SysUserRole.objects.filter(user_id__in=idList).delete()
+        SysUser.objects.filter(id__in=idList).delete()
+        return JsonResponse({'code': 200})
 
 class CheckView(View):
 
