@@ -53,12 +53,17 @@
 			@current-change="handleCurrentChange"
 		/>
 	</div>
+	<Dialog v-model="dialogVisible" :dialogVisible="dialogVisible" :id="id"
+			:dialogTitle="dialogTitle"
+			@initRoleList="initRoleList"></Dialog>
 </template>
 <script setup>
 import {Search, Delete, DocumentAdd, Edit, Tools, RefreshRight} from '@element-plus/icons-vue'
 import {ref} from 'vue'
 import requestUtil, {getServerUrl} from "@/util/request";
 import {ElMessage, ElMessageBox} from 'element-plus'
+import Dialog from './components/dialog'
+
 const queryForm = ref({
 	query: '',
 	pageNum: 1,
@@ -66,6 +71,40 @@ const queryForm = ref({
 })
 const total = ref(0)
 const tableData = ref([])
+
+const multipleSelection = ref([])
+const delBtnStatus = ref(true)
+const handleSelectionChange = (selection) => {
+	console.log("勾选了")
+	console.log(selection)
+	multipleSelection.value = selection;
+	delBtnStatus.value = selection.length == 0;
+}
+const handleDelete = async (id) => {
+	var ids = []
+	if (id) {
+		ids.push(id)
+	} else {
+		multipleSelection.value.forEach(row => {
+			ids.push(row.id)
+		})
+	}
+	const res = await requestUtil.del("role/action", ids)
+	if (res.data.code == 200) {
+		ElMessage({
+			type: 'success',
+			message: '执行成功!'
+		})
+		initRoleList();
+	} else {
+		ElMessage({
+			type: 'error',
+			message: res.data.msg,
+		})
+	}
+}
+
+
 const initRoleList = async () => {
 	const res = await requestUtil.post("role/search", queryForm.value)
 	tableData.value = res.data.roleList;
@@ -80,6 +119,19 @@ const handleSizeChange = (pageSize) => {
 const handleCurrentChange = (pageNum) => {
 	queryForm.value.pageNum = pageNum;
 	initRoleList();
+}
+const id = ref(-1)
+const dialogVisible = ref(false)
+const dialogTitle = ref('')
+const handleDialogValue = (roleId) => {
+	if (roleId) {
+		id.value = roleId;
+		dialogTitle.value = "角色修改"
+	} else {
+		id.value = -1;
+		dialogTitle.value = "角色添加"
+	}
+	dialogVisible.value = true
 }
 </script>
 <style lang="scss" scoped>
