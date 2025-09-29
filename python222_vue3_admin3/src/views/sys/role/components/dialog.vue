@@ -5,6 +5,7 @@
 		width="30%"
 		@close="handleClose"
 	>
+
 		<el-form
 			ref="formRef"
 			:model="form"
@@ -14,12 +15,16 @@
 			<el-form-item label="角色名称" prop="name">
 				<el-input v-model="form.name"/>
 			</el-form-item>
+
 			<el-form-item label="权限字符" prop="code">
 				<el-input v-model="form.code"/>
 			</el-form-item>
+
 			<el-form-item label="备注" prop="remark">
 				<el-input v-model="form.remark" type="textarea" :rows="4"/>
 			</el-form-item>
+
+
 		</el-form>
 		<template #footer>
       <span class="dialog-footer">
@@ -29,11 +34,15 @@
 		</template>
 	</el-dialog>
 </template>
+
 <script setup>
+
 import {defineEmits, defineProps, ref, watch} from "vue";
 import requestUtil, {getServerUrl} from "@/util/request";
 import {ElMessage} from 'element-plus'
-const tableData = ref([])
+
+
+
 const props = defineProps(
 	{
 		id: {
@@ -53,12 +62,16 @@ const props = defineProps(
 		}
 	}
 )
+
+
 const form = ref({
 	id: -1,
 	name: "",
 	code: "",
 	remark: ""
 })
+
+
 const rules = ref({
 	name: [
 		{required: true, message: '请输入角色名称'}
@@ -67,11 +80,15 @@ const rules = ref({
 		{required: true, message: '请输入权限字符'}
 	]
 })
+
 const formRef = ref(null)
+
 const initFormData = async (id) => {
 	const res = await requestUtil.get("role/action?id=" + id);
 	form.value = res.data.role;
 }
+
+
 watch(
 	() => props.dialogVisible,
 	() => {
@@ -85,13 +102,18 @@ watch(
 				code: "",
 				remark: ""
 			}
+
 		}
 	}
 )
+
+
 const emits = defineEmits(['update:modelValue', 'initRoleList'])
+
 const handleClose = () => {
 	emits('update:modelValue', false)
 }
+
 const handleConfirm = () => {
 	formRef.value.validate(async (valid) => {
 		if (valid) {
@@ -110,6 +132,9 @@ const handleConfirm = () => {
 		}
 	})
 }
+
 </script>
+
 <style scoped>
+
 </style>
