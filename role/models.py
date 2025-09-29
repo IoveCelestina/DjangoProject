@@ -7,19 +7,24 @@ from user.models import SysUser
 # Create your models here.
 
 # 系统角色类
+# role/models.py
 class SysRole(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=30, null=True, verbose_name="角色名称")
     code = models.CharField(max_length=100, null=True, verbose_name="角色权限字符串")
-    create_time = models.DateField(null=True, verbose_name="创建时间", )
-    update_time = models.DateField(null=True, verbose_name="更新时间")
+    create_time = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+    update_time = models.DateTimeField(auto_now=True, verbose_name="更新时间")
     remark = models.CharField(max_length=500, null=True, verbose_name="备注")
 
     class Meta:
         db_table = "sys_role"
+        ordering = ['id']   # 顺带去掉分页未排序的警告
+
 
 
 class SysRoleSerializer(serializers.ModelSerializer):
+    create_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', read_only=True)
+    update_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', read_only=True)
     class Meta:
         model = SysRole
         fields = '__all__'

@@ -49,17 +49,54 @@
 			</el-table-column>
 		</el-table>
 	</div>
+	<Dialog v-model="dialogVisible" :tableData="tableData"
+			:dialogVisible="dialogVisible" :id="id"
+			:dialogTitle="dialogTitle" @initMenuList="initMenuList"></Dialog>
+
+
 </template>
 <script setup>
 import {Search, Delete, DocumentAdd, Edit, Tools, RefreshRight} from '@element-plus/icons-vue'
 import {ref} from 'vue'
 import requestUtil, {getServerUrl} from "@/util/request";
 import {ElMessage, ElMessageBox} from 'element-plus'
+import Dialog from './components/dialog'
+
 const tableData = ref([])
 const initMenuList = async () => {
 	const res = await requestUtil.get("menu/treeList");
 	tableData.value = res.data.treeList;
 }
+
+const id = ref(-1)
+const dialogVisible = ref(false)
+const dialogTitle = ref('')
+const handleDialogValue = (menuId) => {
+	if (menuId) {
+		id.value = menuId;
+		dialogTitle.value = "菜单修改"
+	} else {
+		id.value = -1;
+		dialogTitle.value = "菜单添加"
+	}
+	dialogVisible.value = true
+}
+const handleDelete=async (id)=>{
+	const res=await requestUtil.del("menu/action",id)
+	if(res.data.code==200){
+		ElMessage({
+			type: 'success',
+			message: '执行成功!'
+		})
+		initMenuList();
+	}else{
+		ElMessage({
+			type: 'error',
+			message: res.data.msg,
+		})
+	}
+}
+
 initMenuList();
 </script>
 <style lang="scss" scoped>

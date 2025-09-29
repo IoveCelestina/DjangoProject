@@ -39,20 +39,29 @@ class SearchView(View):
 
 
 class SaveView(View):
-
     def post(self, request):
-        data = json.loads(request.body.decode("utf-8"))
-        if data['id'] == -1:  # 添加
-            obj_sysRole = SysRole(name=data['name'], code=data['code'], remark=data['remark'])
-            obj_sysRole.create_time = datetime.now().date()
-            obj_sysRole.save()
-        else:  # 修改
-            obj_sysRole = SysRole(id=data['id'], name=data['name'], code=data['code'],
-                                  remark=data['remark'], create_time=data['create_time'],
-                                  update_time=data['update_time'])
-            obj_sysRole.update_time = datetime.now().date()
-            obj_sysRole.save()
-        return JsonResponse({'code': 200})
+        data = json.loads(request.body.decode('utf-8'))
+
+        # 不接受时间字段，避免类型问题
+        data.pop('create_time', None)
+        data.pop('update_time', None)
+
+        role_id = data.get('id')
+        if role_id:  # 更新
+            obj = SysRole.objects.get(id=role_id)
+            for f in ['name', 'code', 'status', 'remark']:
+                if f in data:
+                    setattr(obj, f, data[f])
+            obj.save()
+            return JsonResponse({'code': 200, 'msg': '更新成功'})
+        else:  # 新增
+            obj = SysRole.objects.create(
+                name=data.get('name'),
+                code=data.get('code'),
+                # status 如果模型里有，自己加默认
+                remark=data.get('remark', '')
+            )
+            return JsonResponse({'code': 200, 'msg': '新增成功', 'id': obj.id})
 
 
 # 角色基本操作
