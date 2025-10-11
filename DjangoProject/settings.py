@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-
+from corsheaders.defaults import default_headers, default_methods
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'rest_framework_jwt',
     'user.apps.UserConfig',
     'role.apps.RoleConfig',
-    'menu.apps.MenuConfig'
+    'menu.apps.MenuConfig',
+    'business',
 ]
 
 MIDDLEWARE = [
@@ -51,19 +52,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'user.middleware.JwtAuthenticationMiddleware',
+    'business.middleware.JwtAuthenticationMiddleware',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = list(default_headers) + ['authorization']
+CORS_ALLOW_METHODS = list(default_methods)   # 包含 'OPTIONS','GET','POST','PUT','PATCH','DELETE'
 
-CORS_ALLOW_METHODS = [
-    'GET',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE',
-]
 
 ROOT_URLCONF = 'DjangoProject.urls' #文件名稱
 

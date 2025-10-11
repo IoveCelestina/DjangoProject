@@ -37,11 +37,23 @@ const routes = [
         path: '/bsns/post',
         name: '岗位管理',
         component: () => import('../views/bsns/Post')
-      },{
+      },
+      {
         path:'/userCenter',
         name:'个人中心',
         component:()=>import('../views/userCenter/index')
+      },
+      {
+        path: '/bsns/trainingOverview',
+        name: '训练时长总览',
+        component: () => import('../views/bsns/TrainingOverview.vue')
+      },
+      {
+        path: '/bsns/trainingAdmin',
+        name: '训练记录管理',
+        component: () => import('../views/bsns/TrainingAdmin.vue')
       }
+
 
     ]
   },

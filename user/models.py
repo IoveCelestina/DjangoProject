@@ -10,6 +10,7 @@ class SysUser(models.Model):
     avatar = models.CharField(max_length=255, null=True, verbose_name="用户头像")
     email = models.CharField(max_length=100, null=True, verbose_name="用户邮箱")
     phonenumber = models.CharField(max_length=11, null=True, verbose_name="手机号码")
+    student_no = models.CharField(max_length=50, null=True, blank=True, unique=True)  # 新增：学号/工号（可唯一）
     login_date = models.DateField(null=True, verbose_name="最后登录时间")
     status = models.IntegerField(null=True, verbose_name="帐号状态（0正常 1停用）")
     create_time = models.DateField(null=True, verbose_name="创建时间", )

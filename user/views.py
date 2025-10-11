@@ -41,7 +41,7 @@ class LoginView(View):
             payload = jwt_payload_handler(user)
             # 将属性值编码成jwt格式的字符串
             token = jwt_encode_handler(payload)
-
+            print("token: "+token)
             roleList = SysRole.objects.raw(
                 "SELECT id ,NAME FROM sys_role WHERE id IN (SELECT role_id FROM sys_user_role WHERE user_id=" + str(
                     user.id) + ")")
