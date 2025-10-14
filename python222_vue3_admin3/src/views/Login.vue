@@ -42,7 +42,19 @@
         </el-button>
 
       </el-form-item>
-    </el-form>
+
+		<el-form-item style="width:100%; text-align:center; margin-top:10px;">
+			<el-button
+				size="default"
+				type="text"
+				@click="goRegister"
+			>
+				没有账号？立即注册
+			</el-button>
+		</el-form-item>
+
+
+	</el-form>
     <!--  底部  -->
     <div class="el-login-footer">
       <span>Copyright © 2013-2025 <a href="https://zstuacm.cn" target="_blank">ZSTU_ACM集训队吧 </a> 版权所有.</span>
@@ -119,7 +131,9 @@
 
   getCookie();
 
-
+const goRegister=()=>{
+	router.push('/register')
+}
 </script>
 
 <style lang="scss" scoped>

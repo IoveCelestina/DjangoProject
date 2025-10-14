@@ -25,3 +25,5 @@ class SysUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = SysUser
         fields = '__all__'
+
+

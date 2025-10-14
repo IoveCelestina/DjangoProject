@@ -9,9 +9,14 @@ from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
 class JwtAuthenticationMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        white_list = ["/user/login"]
+        white_list = [
+            "/user/login",
+            'user/register',
+        ]
         path = request.path
-
+        for white in white_list:
+            if path.startswith(white):
+                return None #放行
         # 1) 放行 CORS 预检（否则浏览器带 Authorization 会先发 OPTIONS，被拦成 401）
         if request.method == 'OPTIONS':
             return None

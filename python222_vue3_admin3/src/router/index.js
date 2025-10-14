@@ -53,14 +53,18 @@ const routes = [
         name: '训练记录管理',
         component: () => import('../views/bsns/TrainingAdmin.vue')
       }
-
-
     ]
   },
   {
     path: '/login',
     name: 'login',
     component: () => import('../views/Login.vue')
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: () => import('@/views/Register.vue'),
+    meta: { title: '注册', public: true }
   }
 ]
 

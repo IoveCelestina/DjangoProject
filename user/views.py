@@ -4,7 +4,9 @@ from datetime import datetime
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework_jwt.settings import api_settings
 
 from DjangoProject import settings
@@ -266,3 +268,50 @@ class GrantRole(View):
             userRole = SysUserRole(user_id=user_id, role_id=roleId)
             userRole.save()
         return JsonResponse({'code': 200})
+
+
+class RegisterView(View):
+    #创建用户+分配角色+绑定得力工号(学号)
+    def post(self,request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            username = data.get("username")
+            password = data.get("password")
+            email = data.get("email")
+            phonenumber = data.get("phonenumber")
+            student_no = data.get("student_no")
+            role_id = data.get("role_id") #角色id 默认为正式队员
+
+            #校验是否重复
+            if SysUser.objects.filter(username=username).exists():
+                return JsonResponse({"code":400,"msg":"用户名已存在"})
+            if student_no and SysUser.objects.filter(student_no=student_no).exists():
+                return JsonResponse({'code':400,"msg":"学号/工号已存在"})
+
+            #创建用户
+
+            user = SysUser(
+                username=username,
+                password=password,
+                email=email,
+                phonenumber=phonenumber,
+                student_no=student_no,
+                status=1,
+                create_time=datetime.now().date(),
+                remark="正式队员"
+            )
+            user.save()
+
+            if role_id:
+                SysUserRole.objects.create(user_id=user.id, role_id=role_id)
+            else:
+                #默认为正式队员
+                default_role = SysRole.objects.fliter(name="正式队员").first
+                if default_role:
+                    SysUserRole.objects.create(user_id=user.id, role_id=default_role)
+
+            return JsonResponse({"code":200,"msg":"注册成功","user_id":user.id})
+        except Exception as e:
+            print("注册异常: ",e)
+            return JsonResponse({"code":500,"msg":f"注册失败:{str(e)}"})
+
