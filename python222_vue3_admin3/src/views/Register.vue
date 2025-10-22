@@ -53,7 +53,7 @@ const form = reactive({
 	email: '',
 	phonenumber: '',
 	student_no: '',
-	role_id: 20250000, // 默认正式队员
+	role_id:'', // 默认正式队员
 })
 
 const rules = {

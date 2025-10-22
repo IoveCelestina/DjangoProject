@@ -46,6 +46,7 @@ class JwtAuthenticationMiddleware(MiddlewareMixin):
         white_list = [
             '/user/login',
             '/user/register',
+            '/media/userAvatar',
         ]
 
         path = request.path

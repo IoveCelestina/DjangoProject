@@ -281,7 +281,7 @@ class RegisterView(View):
             phonenumber = data.get("phonenumber")
             student_no = data.get("student_no")
             role_id = data.get("role_id") #角色id 默认为正式队员
-
+            member_id = data.get("member_id")
             #校验是否重复
             if SysUser.objects.filter(username=username).exists():
                 return JsonResponse({"code":400,"msg":"用户名已存在"})
@@ -301,9 +301,9 @@ class RegisterView(View):
                 remark="正式队员"
             )
             user.save()
-
+            #好像不需要member_id 与 成员之间的映射，直接查询employee_num 即可
             if role_id:
-                SysUserRole.objects.create(user_id=user.id, role_id=role_id)
+                SysUserRole.objects.create(user_id=user.id, role_id=20250001) #全部是正式队员
             else:
                 #默认为正式队员
                 default_role = SysRole.objects.fliter(name="正式队员").first
