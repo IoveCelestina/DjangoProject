@@ -1,7 +1,7 @@
 from django.urls import path
 
 from user.views import TestView, JwtTestView, LoginView, SaveView, PwdView, ImageView, AvatarView, SearchView, \
-    ActionView, CheckView, PasswordView, StatusView, GrantRole, RegisterView
+    ActionView, CheckView, PasswordView, StatusView, GrantRole, RegisterView, CaptchaInitView
 
 urlpatterns = [
     path('login', LoginView.as_view(), name='login'),  # 登录
@@ -17,5 +17,6 @@ urlpatterns = [
     path('resetPassword', PasswordView.as_view(), name='resetPassword'),  # 重置密码
     path('status', StatusView.as_view(), name='status'),  # 状态修改
     path('grantRole', GrantRole.as_view(), name='grant'),  # 角色授权
-    path('register/',RegisterView.as_view(), name='register') #用户注册
+    path('register/',RegisterView.as_view(), name='register'), #用户注册
+    path('captcha/init', CaptchaInitView.as_view()),
 ]

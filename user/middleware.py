@@ -47,6 +47,7 @@ class JwtAuthenticationMiddleware(MiddlewareMixin):
             '/user/login',
             '/user/register',
             '/media/userAvatar',
+            '/user/captcha/init',
         ]
 
         path = request.path
