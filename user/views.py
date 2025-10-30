@@ -1,7 +1,5 @@
-import json
-import base64
-import io
-import os
+import json,base64,io,os
+from base64 import b64decode
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
@@ -18,80 +16,202 @@ from DjangoProject import settings
 from menu.models import SysMenu, SysMenuSerializer
 from role.models import SysRole, SysUserRole
 from user.models import SysUser, SysUserSerializer,CaptchaChallenge
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_v1_5
+from Crypto import Random
 
+
+
+
+# @method_decorator(csrf_exempt, name='dispatch')
+# class LoginView(View):
+#
+#     def buildTreeMenu(selfself,sysMenuList):
+#         resultMenuList:list[SysMenu]=list()
+#         for menu in sysMenuList:
+#             #寻找子节点
+#             for e in sysMenuList:
+#                 if e.parent_id==menu.id:
+#                     if not hasattr(menu,"children"):
+#                         menu.children=list()
+#                     menu.children.append(e)
+#             #判读那父节点，添加到集合
+#             if menu.parent_id==0:
+#                 resultMenuList.append(menu)
+#
+#         return resultMenuList
+#
+#     def post(self, request):
+#         # === 先拿到前端传来的字段 ===
+#         username = request.GET.get("username")
+#         password = request.GET.get("password")
+#         challenge_id = request.GET.get("challenge_id")     # 新增
+#         captcha_answer = request.GET.get("captcha_answer") # 新增
+#
+#         # === 第一步：校验验证码 ===
+#         # 1. challenge_id / captcha_answer 是否齐全
+#         if not challenge_id or not captcha_answer:
+#             return JsonResponse({'code': 500, 'info': '验证码缺失！'})
+#
+#         # 2. challenge_id 是否存在
+#         try:
+#             challenge_obj = CaptchaChallenge.objects.get(id=challenge_id)
+#         except CaptchaChallenge.DoesNotExist:
+#             return JsonResponse({'code': 500, 'info': '验证码无效或已过期！'})
+#
+#         # 3. 是否过期
+#         if challenge_obj.expires_at < timezone.now():
+#             # 过期直接删掉
+#             challenge_obj.delete()
+#             return JsonResponse({'code': 500, 'info': '验证码已过期！'})
+#
+#         # 4. 比对答案（不区分大小写，和 zzyCaptcha 一样会把输入转成大写比较）:contentReference[oaicite:12]{index=12}
+#         real_text = challenge_obj.text
+#         # 验证码是一次性的，用完就删，模仿 zzyCaptcha 在验证后立刻删掉 challenge 记录的做法:contentReference[oaicite:13]{index=13}
+#         challenge_obj.delete()
+#
+#         if captcha_answer.upper().strip() != real_text:
+#             return JsonResponse({'code': 500, 'info': '验证码错误！'})
+#
+#         # === 第二步：账号密码校验（原逻辑） ===
+#         try:
+#             user = SysUser.objects.get(username=username, password=password)
+#
+#             # 生成JWT
+#             from rest_framework_jwt.settings import api_settings
+#             jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+#             jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+#             payload = jwt_payload_handler(user)
+#             token = jwt_encode_handler(payload)
+#
+#             # 当前用户的角色集合
+#             roleList = SysRole.objects.raw(
+#                 "SELECT id ,NAME FROM sys_role WHERE id IN (SELECT role_id FROM sys_user_role WHERE user_id=" + str(
+#                     user.id) + ")"
+#             )
+#
+#             # 拼 roles 字符串
+#             roles=",".join([role.name for role in roleList])
+#
+#             # 根据角色查菜单，组装菜单树
+#             menuSet:set[SysMenu] = set()
+#             for row in roleList:
+#                 menuList = SysMenu.objects.raw(
+#                     "SELECT * FROM sys_menu WHERE id IN (SELECT menu_id FROM sys_role_menu WHERE role_id=" + str(
+#                         row.id) + ")")
+#                 for row2 in menuList:
+#                     menuSet.add(row2)
+#
+#             menuList:list[SysMenu]=list(menuSet)
+#             sorted_menuList=sorted(menuList) # 根据 ordernum 排序（你原来这里写的是 ordername，不过我保留原写法）
+#             sysMenuList:list[SysMenu] = self.buildTreeMenu(sorted_menuList)
+#
+#             serializerMenuList = []
+#             for sysMenu in sysMenuList:
+#                 serializerMenuList.append(SysMenuSerializer(sysMenu).data)
+#
+#         except Exception as e:
+#             print("登录失败：", e)
+#             return JsonResponse({'code': 500, 'info': '用户名或者密码错误！'})
+#
+#         # 登录成功返回
+#         return JsonResponse({
+#             'code': 200,
+#             'token': token,
+#             'user': SysUserSerializer(user).data,
+#             'info': '登录成功',
+#             'roles': roles,
+#             'menuList': serializerMenuList
+#         })
 
 @method_decorator(csrf_exempt, name='dispatch')
 class LoginView(View):
 
-    def buildTreeMenu(selfself,sysMenuList):
-        resultMenuList:list[SysMenu]=list()
+    def buildTreeMenu(self, sysMenuList):
+        resultMenuList: list[SysMenu] = list()
         for menu in sysMenuList:
-            #寻找子节点
             for e in sysMenuList:
-                if e.parent_id==menu.id:
-                    if not hasattr(menu,"children"):
-                        menu.children=list()
+                if e.parent_id == menu.id:
+                    if not hasattr(menu, "children"):
+                        menu.children = list()
                     menu.children.append(e)
-            #判读那父节点，添加到集合
-            if menu.parent_id==0:
+            if menu.parent_id == 0:
                 resultMenuList.append(menu)
-
         return resultMenuList
 
-    def post(self, request):
-        # === 先拿到前端传来的字段 ===
-        username = request.GET.get("username")
-        password = request.GET.get("password")
-        challenge_id = request.GET.get("challenge_id")     # 新增
-        captcha_answer = request.GET.get("captcha_answer") # 新增
+    # 加载后端私钥
+    def load_rsa_private_key(self):
+        # 后端私钥建议放在项目根目录 /rsa_keys/private.pem
+        key_path = os.path.join(settings.BASE_DIR, "rsa_keys", "private.pem")
+        with open(key_path, "rb") as f:
+            private_key = RSA.import_key(f.read())
+        return private_key
 
-        # === 第一步：校验验证码 ===
-        # 1. challenge_id / captcha_answer 是否齐全
+    # 用和前端 jsencrypt 一样的 PKCS1 v1.5 解密
+    def rsa_decrypt(self, enc_text: str) -> str:
+        private_key = self.load_rsa_private_key()
+        cipher = PKCS1_v1_5.new(private_key)
+        enc_bytes = b64decode(enc_text)
+        sentinel = Random.new().read(15)
+        plain_bytes = cipher.decrypt(enc_bytes, sentinel)
+        return plain_bytes.decode("utf-8")
+
+    def post(self, request):
+        # 1. 接收 JSON
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+        except Exception:
+            return JsonResponse({'code': 500, 'info': '请求体不是合法JSON'})
+
+        username = data.get("username")
+        enc_password = data.get("password")       # 前端传的是加密后的
+        challenge_id = data.get("challenge_id")
+        captcha_answer = data.get("captcha_answer")
+
+        # 2. 校验验证码
         if not challenge_id or not captcha_answer:
             return JsonResponse({'code': 500, 'info': '验证码缺失！'})
 
-        # 2. challenge_id 是否存在
         try:
             challenge_obj = CaptchaChallenge.objects.get(id=challenge_id)
         except CaptchaChallenge.DoesNotExist:
             return JsonResponse({'code': 500, 'info': '验证码无效或已过期！'})
 
-        # 3. 是否过期
         if challenge_obj.expires_at < timezone.now():
-            # 过期直接删掉
             challenge_obj.delete()
             return JsonResponse({'code': 500, 'info': '验证码已过期！'})
 
-        # 4. 比对答案（不区分大小写，和 zzyCaptcha 一样会把输入转成大写比较）:contentReference[oaicite:12]{index=12}
         real_text = challenge_obj.text
-        # 验证码是一次性的，用完就删，模仿 zzyCaptcha 在验证后立刻删掉 challenge 记录的做法:contentReference[oaicite:13]{index=13}
         challenge_obj.delete()
 
         if captcha_answer.upper().strip() != real_text:
             return JsonResponse({'code': 500, 'info': '验证码错误！'})
 
-        # === 第二步：账号密码校验（原逻辑） ===
+        # 3. 解密密码
+        try:
+            password = self.rsa_decrypt(enc_password)
+        except Exception as e:
+            print("RSA解密失败:", e)
+            return JsonResponse({'code': 500, 'info': '密码解密失败！'})
+
+        # 4. 账号密码校验（保持你原来的逻辑）
         try:
             user = SysUser.objects.get(username=username, password=password)
 
-            # 生成JWT
             from rest_framework_jwt.settings import api_settings
             jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
             jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
             payload = jwt_payload_handler(user)
             token = jwt_encode_handler(payload)
 
-            # 当前用户的角色集合
             roleList = SysRole.objects.raw(
                 "SELECT id ,NAME FROM sys_role WHERE id IN (SELECT role_id FROM sys_user_role WHERE user_id=" + str(
                     user.id) + ")"
             )
 
-            # 拼 roles 字符串
-            roles=",".join([role.name for role in roleList])
+            roles = ",".join([role.name for role in roleList])
 
-            # 根据角色查菜单，组装菜单树
-            menuSet:set[SysMenu] = set()
+            menuSet: set[SysMenu] = set()
             for row in roleList:
                 menuList = SysMenu.objects.raw(
                     "SELECT * FROM sys_menu WHERE id IN (SELECT menu_id FROM sys_role_menu WHERE role_id=" + str(
@@ -99,9 +219,9 @@ class LoginView(View):
                 for row2 in menuList:
                     menuSet.add(row2)
 
-            menuList:list[SysMenu]=list(menuSet)
-            sorted_menuList=sorted(menuList) # 根据 ordernum 排序（你原来这里写的是 ordername，不过我保留原写法）
-            sysMenuList:list[SysMenu] = self.buildTreeMenu(sorted_menuList)
+            menuList: list[SysMenu] = list(menuSet)
+            sorted_menuList = sorted(menuList)
+            sysMenuList: list[SysMenu] = self.buildTreeMenu(sorted_menuList)
 
             serializerMenuList = []
             for sysMenu in sysMenuList:
@@ -111,7 +231,7 @@ class LoginView(View):
             print("登录失败：", e)
             return JsonResponse({'code': 500, 'info': '用户名或者密码错误！'})
 
-        # 登录成功返回
+        # 5. 返回
         return JsonResponse({
             'code': 200,
             'token': token,
@@ -120,7 +240,6 @@ class LoginView(View):
             'roles': roles,
             'menuList': serializerMenuList
         })
-
 
 
 # Create your views here.
