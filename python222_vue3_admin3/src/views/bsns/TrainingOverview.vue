@@ -20,6 +20,7 @@
 				<p>总训练时长：<b>{{ overview.total_minutes }}</b> 分钟</p>
 				<p>总训练天数：<b>{{ overview.total_days }}</b> 天</p>
 				<p>平均每日训练：<b>{{ overview.avg_minutes_per_day }}</b> 分钟</p>
+				<p>违规次数: <b>{{overview.violationCount}}</b> 次</p>
 			</div>
 
 			<el-divider></el-divider>
@@ -37,7 +38,7 @@ import { ref, onMounted } from 'vue'
 import dayjs from 'dayjs'
 
 const dateRange = ref([dayjs().subtract(30, 'day').format('YYYY-MM-DD'), dayjs().format('YYYY-MM-DD')])
-const overview = ref({ total_minutes: 0, total_days: 0, avg_minutes_per_day: 0, by_date: [] })
+const overview = ref({ total_minutes: 0, total_days: 0, avg_minutes_per_day: 0, by_date: [],violationCount: 0})
 
 const BASE = (typeof process !== 'undefined' && process.env && process.env.VUE_APP_BASE_API)
 	? process.env.VUE_APP_BASE_API
@@ -69,7 +70,8 @@ async function fetchOverview() {
 		total_minutes: d.total_minutes ?? 0,
 		total_days: d.total_days ?? 0,
 		avg_minutes_per_day: d.avg_minutes_per_day ?? 0,
-		by_date: Array.isArray(d.by_date) ? d.by_date : []
+		by_date: Array.isArray(d.by_date) ? d.by_date : [],
+		violationCount: d.violationCount ?? 0
 	}
 }
 

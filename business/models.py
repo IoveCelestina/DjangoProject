@@ -17,3 +17,25 @@ class TrainRecord(models.Model):
         indexes = [
             models.Index(fields=['user_id', 'date']),
         ]
+class LeaveRequest(models.Model):
+    """
+    请假申请记录（带日期区间）
+    """
+    id = models.BigAutoField(primary_key=True)
+    user_id = models.IntegerField(db_index=True)                  # 对应 sys_user.id
+    start_date = models.DateField(db_index=True)                  # 请假开始日期
+    end_date = models.DateField(db_index=True)                    # 请假结束日期
+    status = models.CharField(max_length=20, default='pending')   # pending/approved/rejected/cancelled
+    reason = models.CharField(max_length=500, null=True, blank=True)         # 请假理由，可为空
+    admin_comment = models.CharField(max_length=500, null=True, blank=True)  # 管理员审批意见，可为空
+    create_time = models.DateTimeField(auto_now_add=True)         # 申请提交时间
+    update_time = models.DateTimeField(auto_now=True)             # 最近更新时间
+    decision_time = models.DateTimeField(null=True, blank=True)   # 管理员审批时间
+    cancel_time = models.DateTimeField(null=True, blank=True)     # 用户取消时间
+
+    class Meta:
+        db_table = 'leave_request'
+        indexes = [
+            models.Index(fields=['user_id', 'start_date']),
+            models.Index(fields=['status', 'start_date']),
+        ]

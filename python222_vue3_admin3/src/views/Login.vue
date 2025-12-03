@@ -983,7 +983,7 @@ const handleLogin = () => {
 					if (location.protocol === 'https:') opts.secure = true
 
 					Cookies.set('username', loginForm.value.username, opts)
-					Cookies.set('encpwd', encPwdToSend, opts)   // ✅ 存的就是这次真正发给后端的密文
+					Cookies.set('encpwd', encPwdToSend, opts)   // 存的是发给后端得到密文
 					Cookies.set('rememberMe', '1', opts)
 				} else {
 					Cookies.remove('username')

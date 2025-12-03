@@ -52,7 +52,18 @@ const routes = [
         path: '/bsns/trainingAdmin',
         name: '训练记录管理',
         component: () => import('../views/bsns/TrainingAdmin.vue')
+      },
+      {
+        path: '/bsns/leaveMy',
+        name: '我的请假',
+        component: () => import('../views/bsns/LeaveMy.vue')
+      },
+      {
+        path: '/bsns/leaveAdmin',
+        name: '请假管理',
+        component: () => import('../views/bsns/LeaveAdmin.vue')
       }
+
     ]
   },
   {

@@ -44,7 +44,7 @@ class DeliCloudCompleteAuth:
         payload = {
             "mobile": "13173689200",
             "password": "==AMwITO4YzM3EzMxQHa",
-            "trust_code": "2OTN3OYwxUXwHGeA"
+            "trust_code": "4rYRs8dAwrJru8lx"
         }
         
         print(f"[{datetime.now().strftime('%H:%M:%S')}] 正在登录主系统...")
