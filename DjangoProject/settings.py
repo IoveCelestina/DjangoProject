@@ -9,9 +9,16 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+from datetime import timedelta
 from pathlib import Path
 from corsheaders.defaults import default_headers, default_methods
+from dotenv import load_dotenv
+import os,logging,urllib3
+
+logging.basicConfig(level=logging.DEBUG)
+urllib3.add_stderr_logger()
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,6 +32,18 @@ SECRET_KEY = 'django-insecure-4gs)-erv$xf6m9l*c@ltkfq9i00qu1az(!^k6ifprn@i_+crw#
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+
+
+load_dotenv()  # 加载 .env 文件
+
+DELI_SOURCE_ORG_ID = os.getenv("DELI_SOURCE_ORG_ID")
+DELI_ATTENDANCE_ORG_ID = os.getenv("DELI_ATTENDANCE_ORG_ID")
+DELI_MEMBER_ID = os.getenv("DELI_MEMBER_ID")
+DELI_MOBILE = os.getenv("DELI_MOBILE")
+DELI_PASSWORD = os.getenv("DELI_PASSWORD")
+
+
 
 # Application definition
 
@@ -41,6 +60,7 @@ INSTALLED_APPS = [
     'role.apps.RoleConfig',
     'menu.apps.MenuConfig',
     'business',
+    "attendance.apps.AttendanceConfig",
 ]
 
 MIDDLEWARE = [

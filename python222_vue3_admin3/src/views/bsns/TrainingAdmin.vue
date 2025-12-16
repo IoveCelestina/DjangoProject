@@ -29,6 +29,8 @@
 				<el-table-column prop="date" label="日期" width="160" />
 				<el-table-column prop="minutes" label="训练时长（分钟）" />
 				<el-table-column prop="source" label="来源" width="100" />
+				<el-table-column prop="violation_times" label="新增违规次数" width="120" />
+				<el-table-column prop="violation_reason" label="违规原因" show-overflow-tooltip />
 			</el-table>
 
 			<el-pagination

@@ -26,6 +26,8 @@ urlpatterns = [
     path('role/', include('role.urls')),  # 角色模块
     path('menu/', include('menu.urls')),  # 权限模块
     path('bsns/', include('business.urls')), #业务模块
+    path('bsns/attendance/', include('attendance.urls')),
+
     # 配置媒体文件的路由地址
     re_path('media/(?P<path>.*)', serve, {'document_root': settings.MEDIA_ROOT},name='media')
 

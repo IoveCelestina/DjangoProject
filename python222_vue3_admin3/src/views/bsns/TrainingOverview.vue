@@ -28,6 +28,8 @@
 			<el-table :data="overview.by_date" stripe>
 				<el-table-column prop="date" label="日期" width="200" />
 				<el-table-column prop="minutes" label="训练时长（分钟）" />
+				<el-table-column prop="violation_times" label="新增违规次数" width="120" />
+				<el-table-column prop="violation_reason" label="违规原因" show-overflow-tooltip />
 			</el-table>
 		</el-card>
 	</div>

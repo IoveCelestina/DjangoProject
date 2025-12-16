@@ -30,18 +30,51 @@ class MyOverviewView(View):
         qs = TrainRecord.objects.filter(user_id=uid, date__range=[qf, qt])
         total = qs.aggregate(s=Sum("minutes"))["s"] or 0
         days  = qs.values("date").distinct().count()
-        daily = list(qs.values("date").annotate(minutes=Sum("minutes")).order_by("date"))
-        user = SysUser.objects.filter(id=uid).only("violation_count").first()   #获取当前用户的违规次数
-        violation_count = user.violation_count if user else 0
+
+        user = SysUser.objects.filter(id=uid).only("violation_count").first()
+        total_violation_count = user.violation_count if user else 0
+
+        daily = list(
+            qs.values("date")
+            .annotate(
+                minutes=Sum("minutes"),
+                violation_times=Sum("violation_times"),
+            )
+            .order_by("date")
+        )
+
+        reason_map = {}
+        for r in qs.values("date", "violation_reason"):
+            day = str(r["date"])
+            reason = (r.get("violation_reason") or "").strip()
+            if not reason:
+                continue
+            reason_map.setdefault(day, set()).add(reason)
+
+        by_date = []
+        for d in daily:
+            day = str(d["date"])
+            vt = int(d["violation_times"] or 0)
+            reasons = "；".join(sorted(reason_map.get(day, []))) or None
+            by_date.append({
+                "date": day,
+                "minutes": d["minutes"] or 0,
+                "violation_times": vt,  # 当天新增违规次数（按记录求和）
+                "violation_reason": reasons,  # 当天违规原因（合并）
+            })
+
         return ok({
             "total_minutes": total,
             "total_days": days,
-            "avg_minutes_per_day": round(total/max(days,1), 1),
-            "by_date": [{"date": str(d["date"]), "minutes": d["minutes"]} for d in daily],
-            "violation_count": violation_count
+            "avg_minutes_per_day": round(total / max(days, 1), 1),
+            "by_date": by_date,
+
+            # 这里是“总违规次数”（累计），不是区间内新增违规次数求和
+            "violationCount": total_violation_count,
+
+            # 可选：兼容旧前端/旧字段
+            "violation_count": total_violation_count,
         })
-
-
 
 
 class MyListView(View):
@@ -74,7 +107,9 @@ class MyListView(View):
         qs = qs.order_by(order, "-id")
 
         pg = Paginator(qs, pageSize).page(pageNum)
-        rows = list(pg.object_list.values("id","date","minutes","source"))
+        rows = list(pg.object_list.values("id","date","minutes","source",
+                                          "violation_times", "violation_reason"
+                                          ))
 
         return ok({"total": qs.count(), "pageNum": pageNum, "pageSize": pageSize, "rows": rows})
 

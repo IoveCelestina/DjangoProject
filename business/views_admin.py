@@ -21,7 +21,7 @@ class AdminSearchView(View):
       "minMinutes":null,"maxMinutes":null,
       "order":"date_desc"
     }
-    返回：{ total, rows:[{id,user_id,username,student_no,date,minutes,source}] }
+    返回：{ total, rows:[{id,user_id,username,student_no,date,minutes,source,violation_times,violation_reason}] }
     """
     def post(self, request):
         uid, role = get_login_ctx(request)
@@ -86,7 +86,9 @@ class AdminSearchView(View):
             rows.append({
                 "id": r.id, "user_id": r.user_id,
                 "username": username, "student_no": sno,
-                "date": r.date, "minutes": r.minutes, "source": r.source
+                "date": r.date, "minutes": r.minutes, "source": r.source,
+                "violation_times": r.violation_times,
+                "violation_reason": r.violation_reason,
             })
 
         return ok({"total": total, "pageNum": pageNum, "pageSize": pageSize, "rows": rows})

@@ -1,5 +1,5 @@
 <template>
-  部门管理
+  预留页面
 </template>
 
 <script setup>

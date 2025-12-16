@@ -1,7 +1,6 @@
 <template>
 	<div class="app-container">
 		<el-card>
-			<h2>请假管理</h2>
 
 			<el-form inline :model="queryForm" size="default" class="filter-form">
 				<el-form-item label="用户名">
