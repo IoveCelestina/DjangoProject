@@ -1,7 +1,12 @@
 from django.db import models
 from rest_framework import serializers
+
 from role.models import SysRole
- # Create your models here.
+
+
+# Create your models here.
+
+
 class SysMenu(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50, unique=True, verbose_name="菜单名称")
@@ -15,13 +20,17 @@ class SysMenu(models.Model):
     create_time = models.DateField(null=True, verbose_name="创建时间", )
     update_time = models.DateField(null=True, verbose_name="更新时间")
     remark = models.CharField(max_length=500, null=True, verbose_name="备注")
-    # children = list()
+
     def __lt__(self, other):
         return self.order_num < other.order_num
+
     class Meta:
         db_table = "sys_menu"
+
+
 class SysMenuSerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
+
     def get_children(self, obj):
         print("111")
         if hasattr(obj, "children"):
@@ -29,20 +38,28 @@ class SysMenuSerializer(serializers.ModelSerializer):
             for sysMenu in obj.children:
                 serializerMenuList.append(SysMenuSerializer2(sysMenu).data)
             return serializerMenuList
+
     class Meta:
         model = SysMenu
         fields = '__all__'
+
+
 class SysMenuSerializer2(serializers.ModelSerializer):
     class Meta:
         model = SysMenu
         fields = '__all__'
- # 系统角色菜单关联类
+
+
+# 系统角色菜单关联类
 class SysRoleMenu(models.Model):
     id = models.AutoField(primary_key=True)
     role = models.ForeignKey(SysRole, on_delete=models.PROTECT)
     menu = models.ForeignKey(SysMenu, on_delete=models.PROTECT)
+
     class Meta:
         db_table = "sys_role_menu"
+
+
 class SysRoleMenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = SysRoleMenu

@@ -1,7 +1,8 @@
 <template>
 <div class="footer">
-Copyright © 2012-2025 ZSTU_ACM集训队 版权所有&nbsp;&nbsp;<a
-href="https://zstuacm.cn" target="_blank">zstuacm.cn</a>
+Copyright © 2012-2025&nbsp;&nbsp;<a
+href="https://zstuacm.cn" target="_blank">zstuacm.cn</a>&nbsp;版权所有&nbsp;&nbsp;<a
+href="https://www.miit.gov.cn/" target="_blank">浙ICP备2025208693号</a>
  </div>
  </template>
  <script setup>

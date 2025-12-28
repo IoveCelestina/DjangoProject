@@ -1,0 +1,30 @@
+# Python version note:
+# Django 5.x requires Python 3.10+.
+
+# Core framework
+Django>=5.0,<6.0
+
+# Django REST Framework
+djangorestframework>=3.14,<4.0
+
+# JWT (your current codebase imports rest_framework_jwt.*)
+djangorestframework-jwt==1.11.0
+PyJWT==1.7.1
+
+# CORS (corsheaders.*)
+django-cors-headers>=4.0,<5.0
+
+# Crypto (Crypto.*)
+pycryptodome>=3.20,<4.0
+
+# Captcha / image processing (PIL.*)
+Pillow>=10.0,<13.0
+
+# HTTP client (requests)
+requests>=2.31,<3.0
+
+# Numeric ops (numpy)
+numpy>=1.26,<3.0
+
+# MySQL driver (django.db.backends.mysql)
+mysqlclient>=2.2,<3.0

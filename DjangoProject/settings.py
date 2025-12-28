@@ -9,8 +9,15 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+from datetime import timedelta
 from pathlib import Path
+from corsheaders.defaults import default_headers, default_methods
+from dotenv import load_dotenv
+import os,logging,urllib3
+
+logging.basicConfig(level=logging.DEBUG)
+urllib3.add_stderr_logger()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,6 +33,18 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+
+
+load_dotenv()  # 加载 .env 文件
+
+DELI_SOURCE_ORG_ID = os.getenv("DELI_SOURCE_ORG_ID")
+DELI_ATTENDANCE_ORG_ID = os.getenv("DELI_ATTENDANCE_ORG_ID")
+DELI_MEMBER_ID = os.getenv("DELI_MEMBER_ID")
+DELI_MOBILE = os.getenv("DELI_MOBILE")
+DELI_PASSWORD = os.getenv("DELI_PASSWORD")
+
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -39,7 +58,9 @@ INSTALLED_APPS = [
     'rest_framework_jwt',
     'user.apps.UserConfig',
     'role.apps.RoleConfig',
-    'menu.apps.MenuConfig'
+    'menu.apps.MenuConfig',
+    'business',
+    "attendance.apps.AttendanceConfig",
 ]
 
 MIDDLEWARE = [
@@ -51,19 +72,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'user.middleware.JwtAuthenticationMiddleware',
+    #'business.middleware.JwtAuthenticationMiddleware',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = list(default_headers) + ['authorization']
+CORS_ALLOW_METHODS = list(default_methods)   # 包含 'OPTIONS','GET','POST','PUT','PATCH','DELETE'
 
-CORS_ALLOW_METHODS = [
-    'GET',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE',
-]
 
 ROOT_URLCONF = 'DjangoProject.urls' #文件名稱
 
@@ -138,3 +155,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+MEDIA_ROOT = BASE_DIR / 'media'  #媒体文件映射
+MEDIA_URL = 'media/'
