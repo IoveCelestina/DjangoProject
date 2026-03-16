@@ -98,15 +98,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import dayjs from 'dayjs'
-
-const BASE = (typeof process !== 'undefined' && process.env && process.env.VUE_APP_BASE_API)
-	? process.env.VUE_APP_BASE_API
-	: 'http://localhost:8000'
-
-function authHeader() {
-	const t = sessionStorage.getItem('token') || localStorage.getItem('token')
-	return t ? { Authorization: t } : {}   // 后端不接受 Bearer 前缀
-}
+import { BASE, authHeader } from '@/util/request'
 
 const createForm = ref({
 	dateRange: [dayjs().format('YYYY-MM-DD'), dayjs().format('YYYY-MM-DD')],

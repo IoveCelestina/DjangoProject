@@ -38,18 +38,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import dayjs from 'dayjs'
+import { BASE, authHeader } from '@/util/request'
 
 const dateRange = ref([dayjs().subtract(30, 'day').format('YYYY-MM-DD'), dayjs().format('YYYY-MM-DD')])
 const overview = ref({ total_minutes: 0, total_days: 0, avg_minutes_per_day: 0, by_date: [],violationCount: 0})
-
-const BASE = (typeof process !== 'undefined' && process.env && process.env.VUE_APP_BASE_API)
-	? process.env.VUE_APP_BASE_API
-	: 'http://localhost:8000'   // 本地后端兜底
-
-function authHeader() {
-	const t = sessionStorage.getItem('token') || localStorage.getItem('token')
-	return t ? { Authorization: t } : {}   // 注意：后端不接受 Bearer 前缀
-}
 
 
 async function fetchOverview() {

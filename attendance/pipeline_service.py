@@ -148,47 +148,140 @@ def _compute_minutes_default(min_ms: int, max_ms: int) -> int:
     return int(minutes)
 
 
-def _aggregate_daily_minutes(work_date: date) -> Dict[str, int]:
+def _compute_minutes_with_intervals(checkin_times_ms: List[int]) -> Tuple[int, List[Tuple[int, int]]]:
     """
-    对某一天，从 attendance_checkin 聚合得到 student_no -> minutes
-    - 使用 min/max 时间戳的默认口径（占位规则）
+    新的时间段计算算法：贪心查找第一个距离>=30分钟的点
+
+    算法：
+    1. 从第一个打卡点开始
+    2. 找到第一个距离>=30分钟的点作为终点
+    3. 记录这个时间段
+    4. 从终点的下一个点继续
+
+    返回：(总分钟数, 时间段列表[(start_ms, end_ms)])
+    """
+    if len(checkin_times_ms) < 2:
+        return 0, []
+
+    sorted_times = sorted(checkin_times_ms)
+    intervals = []
+    i = 0
+    MIN_INTERVAL_MS = 30 * 60 * 1000  # 30分钟
+
+    while i < len(sorted_times):
+        t_start = sorted_times[i]
+
+        # 找到第一个距离 >= 30分钟的点
+        found = False
+        for j in range(i + 1, len(sorted_times)):
+            if sorted_times[j] - t_start >= MIN_INTERVAL_MS:
+                intervals.append((t_start, sorted_times[j]))
+                i = j + 1  # 从终点的下一个点继续
+                found = True
+                break
+
+        if not found:
+            i += 1  # 当前点无法形成有效时间段，跳过
+
+    # 计算总时长
+    total_minutes = sum((end - start) // 60000 for start, end in intervals)
+    return total_minutes, intervals
+
+
+def _check_violations(work_date: date, minutes: int, intervals: List[Tuple[int, int]]) -> Tuple[int, Optional[str]]:
+    """
+    检查违规情况
+
+    违规规则：
+    1. 总时长 < 14小时（840分钟）
+    2. 周六打卡时间段未覆盖 12:00-17:00
+
+    返回：(违规次数, 违规原因)
+    """
+    violations = []
+
+    # 违规1：总时长不足14小时
+    if minutes < 840:  # 14小时 = 840分钟
+        violations.append(f"总时长不足14小时（实际{minutes}分钟）")
+
+    # 违规2：周六未覆盖 12:00-17:00
+    if work_date.weekday() == 5:  # 5 = 周六
+        if not intervals:
+            violations.append("周六无有效训练时间段")
+        else:
+            # 检查是否有时间段完全覆盖 12:00-17:00
+            tz = timezone.get_current_timezone()
+            required_start = datetime.combine(work_date, time(12, 0)).replace(tzinfo=tz)
+            required_end = datetime.combine(work_date, time(17, 0)).replace(tzinfo=tz)
+            required_start_ms = int(required_start.timestamp() * 1000)
+            required_end_ms = int(required_end.timestamp() * 1000)
+
+            covered = False
+            for start_ms, end_ms in intervals:
+                if start_ms <= required_start_ms and end_ms >= required_end_ms:
+                    covered = True
+                    break
+
+            if not covered:
+                violations.append("周六训练时间段未覆盖12:00-17:00")
+
+    violation_count = len(violations)
+    violation_reason = "；".join(violations) if violations else None
+
+    return violation_count, violation_reason
+
+
+def _aggregate_daily_minutes(work_date: date) -> Dict[str, Tuple[int, int, Optional[str]]]:
+    """
+    对某一天，从 attendance_checkin 聚合得到 student_no -> (minutes, violation_times, violation_reason)
+    - 使用新的时间段计算算法
+    - 包含违规检测
     """
     tz = timezone.get_current_timezone()
     day_start = datetime.combine(work_date, time.min).replace(tzinfo=tz)
     day_end = datetime.combine(work_date, time.max).replace(tzinfo=tz)
 
-    qs = (
-        AttendanceCheckin.objects.filter(check_in_time__gte=day_start, check_in_time__lte=day_end)
-        .values("student_no")
-        .annotate(min_ms=models.Min("check_in_time_ms"), max_ms=models.Max("check_in_time_ms"))
-    )
-
-    result: Dict[str, int] = {}
-    for row in qs:
-        student_no = row.get("student_no") or ""
-        min_ms = int(row.get("min_ms") or 0)
-        max_ms = int(row.get("max_ms") or 0)
+    # 按学号分组获取所有打卡记录
+    checkins_by_student = {}
+    for checkin in AttendanceCheckin.objects.filter(
+        check_in_time__gte=day_start, check_in_time__lte=day_end
+    ).order_by("check_in_time_ms"):
+        student_no = checkin.student_no
         if not student_no:
             continue
-        result[student_no] = _compute_minutes_default(min_ms, max_ms)
+        if student_no not in checkins_by_student:
+            checkins_by_student[student_no] = []
+        checkins_by_student[student_no].append(checkin.check_in_time_ms)
+
+    result: Dict[str, Tuple[int, int, Optional[str]]] = {}
+    for student_no, checkin_times_ms in checkins_by_student.items():
+        # 计算训练时长和时间段
+        minutes, intervals = _compute_minutes_with_intervals(checkin_times_ms)
+
+        # 检查违规
+        violation_count, violation_reason = _check_violations(work_date, minutes, intervals)
+
+        result[student_no] = (minutes, violation_count, violation_reason)
+
     return result
 
 
-def _write_back_train_record(work_date: date, daily_minutes: Dict[str, int], source: str = "deli") -> int:
+def _write_back_train_record(work_date: date, daily_data: Dict[str, Tuple[int, int, Optional[str]]], source: str = "deli") -> int:
     """
-    将某一天的 minutes 写回 train_record（按 user_id+date upsert）
+    将某一天的数据写回 train_record（按 user_id+date upsert）
+    daily_data: student_no -> (minutes, violation_times, violation_reason)
     返回：成功写入（插入/更新）条数
     """
-    if not daily_minutes:
+    if not daily_data:
         return 0
 
-    student_no_to_user_id = _map_student_no_to_user_id(daily_minutes.keys())
+    student_no_to_user_id = _map_student_no_to_user_id(daily_data.keys())
     TrainRecord = _get_train_record_model()
 
     written = 0
     now = timezone.now()
 
-    for student_no, minutes in daily_minutes.items():
+    for student_no, (minutes, violation_times, violation_reason) in daily_data.items():
         user_id = student_no_to_user_id.get(student_no)
         if not user_id:
             # 找不到 sys_user：跳过，但不抛错，避免整批失败
@@ -197,7 +290,7 @@ def _write_back_train_record(work_date: date, daily_minutes: Dict[str, int], sou
         # extra 建议存可解释信息（先给最小可用）
         extra_obj = {
             "computed_at": now.strftime("%Y-%m-%d %H:%M:%S"),
-            "rule_version": "default_v1",
+            "rule_version": "interval_v1",  # 更新版本号
             "student_no": student_no,
         }
         extra_str = json.dumps(extra_obj, ensure_ascii=False)
@@ -211,6 +304,8 @@ def _write_back_train_record(work_date: date, daily_minutes: Dict[str, int], sou
                 "source": source,
                 "extra": extra_str,
                 "update_time": now,
+                "violation_times": violation_times,
+                "violation_reason": violation_reason,
             },
         )
         written += 1

@@ -1,15 +1,21 @@
 // 引入axios
 import axios from 'axios';
 
+export const BASE = (typeof process !== 'undefined' && process.env && process.env.VUE_APP_BASE_API)
+    ? process.env.VUE_APP_BASE_API
+    : 'http://localhost:8000'
 
-let baseUrl="http://localhost:8000/";
+export function authHeader() {
+    const t = sessionStorage.getItem('token') || localStorage.getItem('token')
+    return t ? { Authorization: t } : {}
+}
+
+let baseUrl = BASE + '/';
 // 创建axios实例
 const httpService = axios.create({
-    // url前缀-'http:xxx.xxx'
-    // baseURL: process.env.BASE_API, // 需自定义
-    baseURL:baseUrl,
-    // 请求超时时间
-    timeout: 3000 // 需自定义
+    baseURL: baseUrl,
+    // 请求超时时间（考勤同步等长时间操作需要更长的超时时间）
+    timeout: 60000 // 60秒
 });
 
 //添加请求和响应拦截器

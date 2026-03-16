@@ -82,15 +82,7 @@
 
 <script setup>
 import { ref } from 'vue'
-
-const BASE = (typeof process !== 'undefined' && process.env && process.env.VUE_APP_BASE_API)
-	? process.env.VUE_APP_BASE_API
-	: 'http://localhost:8000'
-
-function authHeader() {
-	const t = sessionStorage.getItem('token') || localStorage.getItem('token')
-	return t ? { Authorization: t } : {}
-}
+import { BASE, authHeader } from '@/util/request'
 
 const queryForm = ref({
 	username: '',

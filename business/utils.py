@@ -30,7 +30,7 @@ def get_login_ctx(request): #这里采取的方法是访问登录账号的user_i
             SysRole.objects.filter(sysuserrole__user_id=uid)
             .values_list("code", flat=True)
         )
-        role = role_codes[0].lower() if role_codes else None
+        role = role_codes[0].lower() if (role_codes and role_codes[0]) else None
         return uid, role
 
     # 2) 自己解 JWT
@@ -69,5 +69,5 @@ def get_login_ctx(request): #这里采取的方法是访问登录账号的user_i
         if pr:
             role_codes = [pr]
 
-    role = role_codes[0].lower() if role_codes else None
+    role = role_codes[0].lower() if (role_codes and role_codes[0]) else None
     return uid, role
