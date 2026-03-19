@@ -1,0 +1,30 @@
+# Django 核心框架
+Django==5.0.1
+
+# REST API 框架 + JWT 认证
+djangorestframework==3.14.0
+djangorestframework-jwt==1.11.0
+PyJWT==1.7.1
+
+# CORS 跨域支持
+django-cors-headers==4.3.1
+
+# 环境变量管理
+python-dotenv==1.0.0
+
+# 加密库（Crypto.PublicKey、Crypto.Cipher）
+pycryptodome==3.19.0
+
+# 图像处理（验证码生成）
+Pillow==10.4.0
+numpy==1.26.4
+
+# HTTP 请求库（考勤同步）
+requests==2.31.0
+urllib3==2.1.0
+
+# 加密库（考勤 trust_code 加密存储）
+cryptography==41.0.7
+
+# 数据库驱动（需要本地安装 MySQL/MariaDB，或手动安装）
+# mysqlclient==2.2.0

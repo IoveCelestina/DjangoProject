@@ -800,8 +800,9 @@
 
 		<!-- 底部版权 -->
 		<div class="el-login-footer">
-      <span>Copyright © 2013-2025
-        <a href="https://zstuacm.cn" target="_blank">ZSTU_ACM集训队吧 </a> 版权所有.
+      <span>Copyright © 2012-2025&nbsp;&nbsp;<a
+href="https://zstuacm.cn" target="_blank">zstuacm.cn</a>&nbsp;版权所有&nbsp;&nbsp;<a
+href="https://www.miit.gov.cn/" target="_blank">浙ICP备2025208693号</a>
       </span>
 		</div>
 
@@ -1054,7 +1055,8 @@ onMounted(async () => {
 	letter-spacing: 0.5px;
 }
 .login-form {
-	width: 480px;
+	max-width: 480px;
+	width: 90%;
 	background: transparent;
 	border-radius: 8px;
 	box-shadow: none;

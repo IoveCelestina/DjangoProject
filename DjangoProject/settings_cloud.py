@@ -12,9 +12,19 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from corsheaders.defaults import default_headers, default_methods
 from pathlib import Path
+from dotenv import load_dotenv
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 BASE_BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+load_dotenv()  # 加载 .env 文件
+
+DELI_SOURCE_ORG_ID = os.getenv("DELI_SOURCE_ORG_ID")
+DELI_ATTENDANCE_ORG_ID = os.getenv("DELI_ATTENDANCE_ORG_ID")
+DELI_MEMBER_ID = os.getenv("DELI_MEMBER_ID")
+DELI_MOBILE = os.getenv("DELI_MOBILE")
+DELI_PASSWORD = os.getenv("DELI_PASSWORD")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -47,6 +57,7 @@ INSTALLED_APPS = [
     'role.apps.RoleConfig',
     'menu.apps.MenuConfig',
     'business',
+    "attendance.apps.AttendanceConfig",
 ]
 
 MIDDLEWARE = [

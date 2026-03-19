@@ -62,7 +62,14 @@ const routes = [
         path: '/bsns/leaveAdmin',
         name: '请假管理',
         component: () => import('../views/bsns/LeaveAdmin.vue')
+      },
+      {
+        path: "/bsns/attendanceSyncAdmin",
+        name: "AttendanceSyncAdmin",
+        component: () => import("@/views/bsns/AttendanceSyncAdmin.vue"),
+        meta: { title: "考勤同步" }
       }
+
 
     ]
   },

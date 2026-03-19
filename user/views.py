@@ -194,9 +194,19 @@ class LoginView(View):
             print("RSA解密失败:", e)
             return JsonResponse({'code': 500, 'info': '密码解密失败！'})
 
-        # 4. 账号密码校验（保持你原来的逻辑）
+        # 4. 账号密码校验（使用 Hash 验证）
         try:
-            user = SysUser.objects.get(username=username, password=password)
+            from django.contrib.auth.hashers import check_password
+
+            # 先根据用户名查询用户
+            try:
+                user = SysUser.objects.get(username=username)
+            except SysUser.DoesNotExist:
+                raise Exception("用户不存在")
+
+            # 验证密码 Hash
+            if not check_password(password, user.password):
+                raise Exception("密码错误")
 
             from rest_framework_jwt.settings import api_settings
             jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
@@ -274,6 +284,8 @@ class JwtTestView(View):
 class SaveView(View):
 
     def post(self, request):
+        from django.contrib.auth.hashers import make_password
+
         data = json.loads(request.body.decode("utf-8"))
         print(data)
         if data['id'] == -1:  # 添加
@@ -283,7 +295,8 @@ class SaveView(View):
                                   remark=data['remark'])
             obj_sysUser.create_time = datetime.now().date()
             obj_sysUser.avatar = 'default.jpg'
-            obj_sysUser.password = "123456"
+            # 加密默认密码
+            obj_sysUser.password = make_password("123456")
             obj_sysUser.save()
         else:  # 修改
             obj_sysUser = SysUser(id=data['id'], username=data['username'], password=data['password'],
@@ -328,15 +341,22 @@ class CheckView(View):
         else:
             return JsonResponse({'code': 200})
 
-class PwdView(View): #不安全，之后需要在前端进行加密
+class PwdView(View):
+    """修改密码（已使用 Hash 加密）"""
     def post(self, request):
+        from django.contrib.auth.hashers import check_password, make_password
+
         data = json.loads(request.body.decode("utf-8"))
         id = data['id']
         oldPassword = data['oldPassword']
         newPassword = data['newPassword']
+
         obj_user = SysUser.objects.get(id=id)
-        if obj_user.password == oldPassword:
-            obj_user.password = newPassword
+
+        # 验证旧密码
+        if check_password(oldPassword, obj_user.password):
+            # 加密新密码
+            obj_user.password = make_password(newPassword)
             obj_user.update_time = datetime.now().date()
             obj_user.save()
             return JsonResponse({'code': 200})
@@ -399,12 +419,15 @@ class SearchView(View):
         return JsonResponse({'code': 200, 'userList': users, 'total': total})
 
 
-# 重置密码
+# 重置密码（使用 Hash 加密）
 class PasswordView(View):
     def get(self, request):
+        from django.contrib.auth.hashers import make_password
+
         id = request.GET.get("id")
         user_object = SysUser.objects.get(id=id)
-        user_object.password = "123456"
+        # 加密默认密码
+        user_object.password = make_password("123456")
         user_object.update_time = datetime.now().date()
         user_object.save()
         return JsonResponse({'code': 200})
@@ -435,8 +458,10 @@ class GrantRole(View):
 
 
 class RegisterView(View):
-    #创建用户+分配角色+绑定得力工号(学号)
+    """创建用户+分配角色+绑定得力工号(学号) - 使用 Hash 加密"""
     def post(self,request):
+        from django.contrib.auth.hashers import make_password
+
         try:
             data = json.loads(request.body.decode("utf-8"))
             username = data.get("username")
@@ -453,10 +478,9 @@ class RegisterView(View):
                 return JsonResponse({'code':400,"msg":"学号/工号已存在"})
 
             #创建用户
-
             user = SysUser(
                 username=username,
-                password=password,
+                password=make_password(password),  # 加密密码
                 email=email,
                 phonenumber=phonenumber,
                 student_no=student_no,
@@ -465,14 +489,12 @@ class RegisterView(View):
                 remark="正式队员"
             )
             user.save()
-            #好像不需要member_id 与 成员之间的映射，直接查询employee_num 即可
-            if role_id:
-                SysUserRole.objects.create(user_id=user.id, role_id=20250001) #全部是正式队员
+            # 统一分配"正式队员"角色
+            member_role = SysRole.objects.filter(name="正式队员").first()
+            if member_role:
+                SysUserRole.objects.create(user_id=user.id, role_id=member_role.id)
             else:
-                #默认为正式队员
-                default_role = SysRole.objects.fliter(name="正式队员").first
-                if default_role:
-                    SysUserRole.objects.create(user_id=user.id, role_id=default_role)
+                print("警告: 数据库中未找到'正式队员'角色，请先运行初始化脚本")
 
             return JsonResponse({"code":200,"msg":"注册成功","user_id":user.id})
         except Exception as e:

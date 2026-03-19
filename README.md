@@ -1,3 +1,74 @@
+# 企业内部管理系统
+
+基于 Django + Vue 3 的前后端分离管理系统，用于人员管理、考勤管理、训练记录跟踪、请假审批等企业内部业务。
+
+## 快速开始
+
+### 环境要求
+- Python 3.8+
+- Node.js 14+
+- MySQL/PostgreSQL（根据配置）
+
+### 后端启动
+
+```powershell
+# 1. 进入项目目录
+cd DjangoProject
+
+# 2. 创建虚拟环境
+python -m venv venv
+
+# 3. 激活虚拟环境
+venv\Scripts\activate
+
+# 4. 安装依赖
+pip install -r requirements.txt
+
+# 5. 数据库迁移（确保 MySQL 已启动，数据库 db_admin2 已创建）
+python manage.py migrate
+
+# 6. 启动后端服务
+python manage.py runserver
+```
+
+后端服务将运行在 `http://localhost:8000`
+
+> 数据库配置见 `DjangoProject/settings.py`：HOST=localhost, PORT=3306, USER=root, PASSWORD=1234, NAME=db_admin2
+
+### 环境变量配置
+
+在 `DjangoProject/` 目录下创建 `.env` 文件，配置以下变量：
+
+```env
+# 得力云考勤配置（用于考勤同步功能）
+DELI_MOBILE=你的手机号
+DELI_PASSWORD="你的密码"
+DELI_SOURCE_ORG_ID=你的源组织ID
+DELI_ATTENDANCE_ORG_ID=你的考勤组织ID
+DELI_MEMBER_ID=你的成员ID
+```
+
+### 前端启动
+
+```bash
+# 1. 进入前端目录
+cd DjangoProject/python222_vue3_admin3
+
+# 2. 安装依赖（首次运行）
+npm install
+
+# 3. 启动开发服务器
+npm run serve
+```
+
+前端服务将运行在 `http://localhost:8080`（默认端口）
+
+### 访问系统
+
+打开浏览器访问 `http://localhost:8080`，使用创建的管理员账号登录。
+
+---
+
 # 项目结构
 
 ```tex

@@ -58,4 +58,21 @@ const handleSubmit = () => {
 }
 </script>
 <style lang="scss" scoped>
+:deep(.el-form-item__label) {
+	font-weight: 500;
+	color: #606266;
+}
+:deep(.el-input__wrapper) {
+	border-radius: 8px;
+}
+:deep(.el-button--primary) {
+	background: linear-gradient(135deg, #647eff, #42b883);
+	border: none;
+	border-radius: 8px;
+	padding: 10px 32px;
+	font-weight: 600;
+}
+:deep(.el-button--primary:hover) {
+	filter: brightness(1.1);
+}
 </style>

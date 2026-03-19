@@ -9,6 +9,8 @@ class TrainRecord(models.Model):
     minutes = models.IntegerField()                        # 当天训练总分钟数
     source = models.CharField(max_length=20, default='manual')  # manual/deli
     extra = models.JSONField(null=True, blank=True)        # 预留原始数据
+    violation_times = models.IntegerField(default=0)  # 违规次数
+    violation_reason = models.TextField(null=True, blank=True)  # 违规原因（较长建议 TextField）
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
 
@@ -16,6 +18,9 @@ class TrainRecord(models.Model):
         db_table = 'train_record'
         indexes = [
             models.Index(fields=['user_id', 'date']),
+        ]
+        constraints = [
+            models.UniqueConstraint(fields=["user_id", "date"], name="uniq_train_record_user_date")
         ]
 class LeaveRequest(models.Model):
     """
