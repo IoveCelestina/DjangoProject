@@ -1055,7 +1055,8 @@ onMounted(async () => {
 	letter-spacing: 0.5px;
 }
 .login-form {
-	width: 480px;
+	max-width: 480px;
+	width: 90%;
 	background: transparent;
 	border-radius: 8px;
 	box-shadow: none;
